@@ -1,9 +1,11 @@
 import mysql.connector
 
-class Registro_datos():
+class DataBase:
     def __init__(self):
-        self.conexion = mysql.connector.connect (host='localhost',
-                                                database = 'FashionTec',
-                                                user = 'root',
-                                                password = 'mininayluz19')
-        
+        self.connection=mysql.connector.connect(
+            host="localhost",
+            user="root",
+            password="mininaluz19",
+            database="tatuadores"
+        )
+        self.cursor=self.connection.cursor()
