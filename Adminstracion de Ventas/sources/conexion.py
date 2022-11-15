@@ -6,6 +6,6 @@ class DataBase:
             host="localhost",
             user="root",
             password="mininaluz19",
-            database="tatuadores"
+            database="TattooWorld"
         )
         self.cursor=self.connection.cursor()

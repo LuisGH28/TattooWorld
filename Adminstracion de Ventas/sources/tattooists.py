@@ -1,3 +1,4 @@
+import tkinter as tk
 from ast import Lambda
 from faulthandler import disable
 from importlib.metadata import entry_points
@@ -13,6 +14,9 @@ window=Tk()
 window.title("Tatuadores")
 window.geometry("600x500")
 
+
+
+
 Db=DataBase()
 modify = False
 Nombre=StringVar()
@@ -20,7 +24,6 @@ AP=StringVar()
 AM=StringVar()
 Estilo=StringVar()
 Area=StringVar()
-
 
 def tattoClick(event):
     idTatuador=tvTattooists.selection()[0]
@@ -164,9 +167,6 @@ def add():
             lblMessage.config(text="Los campos no deben de estar vacios >:V", fg="red")
     else:
         modifyFalse()
-
-
-
 
 def update():
     if modify == True:
