@@ -1,12 +1,13 @@
 Create database TattooWorld;
 
 use TattooWorld;
+
 -- -----------------------------------------------------
 -- Table `TattooWorld`.`Area`
 -- -----------------------------------------------------
 CREATE TABLE Area(
-  `idArea` INT NOT NULL PRIMARY KEYAUTO_INCREMENT,
-  `Nombre` VARCHAR(45),
+  `idArea` INT NOT NULL PRIMARY KEY AUTO_INCREMENT,
+  `Nombre` VARCHAR(45)
 );
 
 -- -----------------------------------------------------
@@ -26,7 +27,7 @@ CREATE TABLE Repartidor(
 CREATE TABLE Style_Tattoo(
   `idStyle` INT NOT NULL PRIMARY KEY AUTO_INCREMENT,
   `Nombre` VARCHAR(45),
-  `Descripcion` VARCHAR(45),
+  `Descripcion` VARCHAR(45)
 );
 
 -- -----------------------------------------------------
@@ -36,7 +37,7 @@ CREATE TABLE Clientes(
   `idCliente` INT NOT NULL PRIMARY KEY AUTO_INCREMENT,
   `Nombre` VARCHAR(45),
   `Edad` INT NOT NULL,
-  `Celular` INT NOT NULL,
+  `Celular` INT NOT NULL
 );
 
 -- -----------------------------------------------------
@@ -44,14 +45,14 @@ CREATE TABLE Clientes(
 -- -----------------------------------------------------
 CREATE TABLE Tatuadores(
   `idTatuadores` INT NOT NULL PRIMARY KEY AUTO_INCREMENT,
-  `idStyle` INT NOT NULL,
-  `idArea` INT NOT NULL,
   `Nombre` VARCHAR(45),
   `Apellido_M` VARCHAR(45),
   `Apellido_P` VARCHAR(45),
-    FOREIGN KEY (idStyle) REFERENCES Style_Tattoo(idStyle)
+  `idStyle` INT,
+  `idArea` INT,
+    CONSTRAINT fk_style FOREIGN KEY (idStyle) REFERENCES Style_Tattoo(idStyle)
     ON DELETE CASCADE ON UPDATE CASCADE,
-    FOREIGN KEY (idArea) REFERENCES Area(idArea)
+    CONSTRAINT fk_area FOREIGN KEY (idArea) REFERENCES Area(idArea)
     ON DELETE CASCADE ON UPDATE CASCADE
 );
 
@@ -60,10 +61,10 @@ CREATE TABLE Tatuadores(
 -- -----------------------------------------------------
 CREATE TABLE Stock(
   `idStock` INT NOT NULL PRIMARY KEY AUTO_INCREMENT,
-  `idTatuadores` INT NOT NULL,
   `Nombre` VARCHAR(45),
   `Cantidad` INT NOT NULL,
-    FOREIGN KEY (idTatuadores) REFERENCES Tatuadores (idTatuadores)
+  `idTatuadores` INT,
+    CONSTRAINT fk_tatuador FOREIGN KEY (idTatuadores) REFERENCES Tatuadores (idTatuadores)
     ON DELETE CASCADE ON UPDATE CASCADE
 );
 
@@ -72,10 +73,10 @@ CREATE TABLE Stock(
 -- -----------------------------------------------------
 CREATE TABLE Portafolio(
   `idPortafolio` INT NOT NULL PRIMARY KEY AUTO_INCREMENT,
-  `idTatuador` INT NOT NULL,
   `Tatuador` VARCHAR(45),
   `Imagen` LONGBLOB NOT NULL,
-  FOREIGN KEY (idTatuador) REFERENCES Tatuadores(idTatuadores)
+  `idTatuador` INT,
+    CONSTRAINT fk_tatuadores FOREIGN KEY (idTatuador) REFERENCES Tatuadores(idTatuadores)
     ON DELETE CASCADE ON UPDATE CASCADE
 );
 
@@ -88,8 +89,8 @@ CREATE TABLE Recepcionista(
   `Apellido_M` VARCHAR(45),
   `Apellido_P` VARCHAR(45),
   `Celular` INT NOT NULL,
-  `idArea` INT NOT NULL,
-    FOREIGN KEY (idArea) REFERENCES Area(idArea)
+  `idArea` INT,
+    CONSTRAINT fk_areas FOREIGN KEY (idArea) REFERENCES Area(idArea)
     ON DELETE CASCADE ON UPDATE CASCADE
 );
 
@@ -98,17 +99,17 @@ CREATE TABLE Recepcionista(
 -- -----------------------------------------------------
 CREATE TABLE Citas (
   `idCitas` INT NOT NULL PRIMARY KEY AUTO_INCREMENT,
-  `idCliente` INT NOT NULL,
-  `idTatuador` INT NOT NULL,
-  `idRecepcionista` INT NOT NULL,
   `Recepcionista` VARCHAR(45) ,
   `Tatuador` VARCHAR(45),
   `Cliente` VARCHAR(45),
-  FOREIGN KEY (idRecepcionista) REFERENCES Recepcionista(idRecepcionista)
+  `idCliente` INT,
+  `idTatuador` INT,
+  `idRecepcionista` INT,
+  CONSTRAINT fk_reps FOREIGN KEY (idRecepcionista) REFERENCES Recepcionista(idRecepcionista)
     ON DELETE CASCADE ON UPDATE CASCADE,
-  FOREIGN KEY (idTatuador) REFERENCES Tatuadores(idTatuadores)
+  CONSTRAINT  fk_tatuadors FOREIGN KEY (idTatuador) REFERENCES Tatuadores(idTatuadores)
     ON DELETE CASCADE ON UPDATE CASCADE,
-  FOREIGN KEY (idCliente) REFERENCES Clientes(idCliente)
+  CONSTRAINT fk_clientes FOREIGN KEY (idCliente) REFERENCES Clientes(idCliente)
     ON DELETE CASCADE ON UPDATE CASCADE
 );
 
@@ -117,13 +118,13 @@ CREATE TABLE Citas (
 -- -----------------------------------------------------
 CREATE TABLE Login(
   `idLogin` INT NOT NULL PRIMARY KEY AUTO_INCREMENT,
-  `idTatuador` INT NOT NULL,
-  `idRecepcionista` INT NOT NULL,
   `User` VARCHAR(45),
   `Password` VARCHAR(45),
-  FOREIGN KEY (idTatuador) REFERENCES Tatuadores(idTatuadores)
+  `idTatuador` INT,
+  `idRecepcionista` INT,
+  CONSTRAINT fk_tatuadore FOREIGN KEY (idTatuador) REFERENCES Tatuadores(idTatuadores)
     ON DELETE CASCADE ON UPDATE CASCADE,
-  FOREIGN KEY (idRecepcionista) REFERENCES Recepcionista(idRecepcionista)
+  CONSTRAINT fk_repce FOREIGN KEY (idRecepcionista) REFERENCES Recepcionista(idRecepcionista)
     ON DELETE CASCADE ON UPDATE CASCADE
 );
 
@@ -133,17 +134,15 @@ CREATE TABLE Login(
 -- -----------------------------------------------------
 CREATE TABLE Login_Tables(
   `idLogin` INT NOT NULL PRIMARY KEY AUTO_INCREMENT,
-  `idTatuador` INT NOT NULL,
-  `idRecepcionista` INT NOT NULL,
   `User` VARCHAR(45),
   `Password` VARCHAR(45),
-  FOREIGN KEY (idTatuador) REFERENCES Tatuadores(idTatuadores)
+  `idTatuador` INT,
+  `idRecepcionista` INT,
+  CONSTRAINT fk_tatuado FOREIGN KEY (idTatuador) REFERENCES Tatuadores(idTatuadores)
     ON DELETE CASCADE ON UPDATE CASCADE,
-  FOREIGN KEY (idRecepcionista) REFERENCES Recepcionista(idRecepcionista)
+  CONSTRAINT fk_repcep FOREIGN KEY (idRecepcionista) REFERENCES Recepcionista(idRecepcionista)
     ON DELETE CASCADE ON UPDATE CASCADE
 );
-
-
 
 
 
