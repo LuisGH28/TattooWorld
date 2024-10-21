@@ -1,0 +1,132 @@
+PRAGMA foreign_keys = ON;
+
+-- -----------------------------------------------------
+-- Table `Style_Tattoo`
+-- -----------------------------------------------------
+CREATE TABLE IF NOT EXISTS `Style_Tattoo` (
+  `idStyle_Tattoo` INTEGER PRIMARY KEY AUTOINCREMENT,
+  `Nombre` TEXT NULL,
+  `Descripcion` TEXT NULL
+);
+
+-- -----------------------------------------------------
+-- Table `Area`
+-- -----------------------------------------------------
+CREATE TABLE IF NOT EXISTS `Area` (
+  `idArea` INTEGER PRIMARY KEY AUTOINCREMENT,
+  `Nombre_Area` TEXT NULL
+);
+
+-- -----------------------------------------------------
+-- Table `Tatuadores`
+-- -----------------------------------------------------
+CREATE TABLE IF NOT EXISTS `Tatuadores` (
+  `idTatuador` INTEGER PRIMARY KEY AUTOINCREMENT,
+  `Nombre` TEXT NULL,
+  `Apellido_P` TEXT NULL,
+  `Apellido_M` TEXT NULL,
+  `Estilo` INTEGER NULL,
+  `Area` INTEGER NULL,
+  FOREIGN KEY (`Estilo`) REFERENCES `Style_Tattoo` (`idStyle_Tattoo`) ON DELETE CASCADE ON UPDATE CASCADE,
+  FOREIGN KEY (`Area`) REFERENCES `Area` (`idArea`) ON DELETE CASCADE ON UPDATE CASCADE
+);
+
+-- -----------------------------------------------------
+-- Table `Clientes`
+-- -----------------------------------------------------
+CREATE TABLE IF NOT EXISTS `Clientes` (
+  `idClientes` INTEGER PRIMARY KEY AUTOINCREMENT,
+  `Nombre` TEXT NULL,
+  `Edad` INTEGER NULL,
+  `Celular` INTEGER NULL
+);
+
+-- -----------------------------------------------------
+-- Table `Capturista`
+-- -----------------------------------------------------
+CREATE TABLE IF NOT EXISTS `Capturista` (
+  `idCapturista` INTEGER PRIMARY KEY AUTOINCREMENT,
+  `Nombre` TEXT NULL,
+  `Apellido_P` TEXT NULL,
+  `Apellido_M` TEXT NULL,
+  `Area` INTEGER NULL,
+  FOREIGN KEY (`Area`) REFERENCES `Area` (`idArea`) ON DELETE CASCADE ON UPDATE CASCADE
+);
+
+-- -----------------------------------------------------
+-- Table `Ticket`
+-- -----------------------------------------------------
+CREATE TABLE IF NOT EXISTS `Ticket` (
+  `idTicket` INTEGER PRIMARY KEY AUTOINCREMENT,
+  `idCliente` INTEGER NULL,
+  `idTrabajadores` INTEGER NULL,
+  `Nombre` TEXT NULL,
+  `Tatuador` TEXT NULL,
+  `Precio` INTEGER NULL,
+  FOREIGN KEY (`idCliente`) REFERENCES `Clientes` (`idClientes`) ON DELETE CASCADE ON UPDATE CASCADE,
+  FOREIGN KEY (`idTrabajadores`) REFERENCES `Capturista` (`idCapturista`) ON DELETE CASCADE ON UPDATE CASCADE
+);
+
+-- -----------------------------------------------------
+-- Table `Porfolio`
+-- -----------------------------------------------------
+CREATE TABLE IF NOT EXISTS `Porfolio` (
+  `idPorfolio` INTEGER PRIMARY KEY AUTOINCREMENT,
+  `idTatuador` INTEGER NULL,
+  `Tatuador` TEXT NULL,
+  `Image` BLOB NULL,
+  FOREIGN KEY (`idTatuador`) REFERENCES `Tatuadores` (`idTatuador`) ON DELETE CASCADE ON UPDATE CASCADE
+);
+
+-- -----------------------------------------------------
+-- Table `Repartido`
+-- -----------------------------------------------------
+CREATE TABLE IF NOT EXISTS `Repartido` (
+  `idRepartidor` INTEGER PRIMARY KEY AUTOINCREMENT,
+  `Nombre` TEXT NULL,
+  `Telefono` INTEGER NULL,
+  `Direccion` TEXT NULL
+);
+
+-- -----------------------------------------------------
+-- Table `Stock`
+-- -----------------------------------------------------
+CREATE TABLE IF NOT EXISTS `Stock` (
+  `idStock` INTEGER PRIMARY KEY AUTOINCREMENT,
+  `Colores_de_Tinta` TEXT NULL,
+  `Agujas` TEXT NULL,
+  `Guantes` TEXT NULL,
+  `Cubrebocas` TEXT NULL,
+  `Playo` TEXT NULL,
+  `Servilletas` TEXT NULL,
+  `Jabon` TEXT NULL,
+  `Crema` TEXT NULL,
+  `Rastrillo` TEXT NULL,
+  `idTatuador` INTEGER NOT NULL,
+  `idRepartidor` INTEGER NOT NULL,
+  FOREIGN KEY (`idTatuador`) REFERENCES `Tatuadores` (`idTatuador`) ON DELETE CASCADE ON UPDATE CASCADE,
+  FOREIGN KEY (`idRepartidor`) REFERENCES `Repartido` (`idRepartidor`) ON DELETE CASCADE ON UPDATE CASCADE
+);
+
+-- -----------------------------------------------------
+-- Table `Page`
+-- -----------------------------------------------------
+CREATE TABLE IF NOT EXISTS `Page` (
+  `idPage` INTEGER PRIMARY KEY AUTOINCREMENT,
+  `idTicket` INTEGER NULL,
+  `Tipo_de_pago` TEXT NULL,
+  FOREIGN KEY (`idTicket`) REFERENCES `Ticket` (`idTicket`) ON DELETE CASCADE ON UPDATE CASCADE
+);
+
+-- -----------------------------------------------------
+-- Table `Citas`
+-- -----------------------------------------------------
+CREATE TABLE IF NOT EXISTS `Citas` (
+  `idCitas` INTEGER PRIMARY KEY AUTOINCREMENT,
+  `idCliente` INTEGER NULL,
+  `idTatuador` INTEGER NULL,
+  `Nombre` TEXT NULL,
+  `Tatuador` TEXT NULL,
+  FOREIGN KEY (`idCliente`) REFERENCES `Clientes` (`idClientes`) ON DELETE CASCADE ON UPDATE CASCADE,
+  FOREIGN KEY (`idTatuador`) REFERENCES `Tatuadores` (`idTatuador`) ON DELETE CASCADE ON UPDATE CASCADE
+);
