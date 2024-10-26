@@ -1,92 +1,73 @@
 """ 
-__author__ = "Luis Gonzalez, Sandra Fragoso"
-__version__ = "0.1"
+__author__ = "Luis Gonzalez"
+__version__ = "1.0.1"
 __maintainer__ = "Luis Gonzalez"
 __email__ = "luisgnzhdz@gmail.com"
 __status__ = "Production"
 """
 
-import mysql.connector
+import sqlite3
 
 
-class Connection:
+def connect_db():
+    try:
+        conexion = sqlite3.connect('DB/tattoo_world.sqlite')  
+        return conexion
+    except sqlite3.Error as e:
+        print(f"Error al conectar a la base de datos: {e}")
+        return None
 
-    def __init__(self):
-        try:
-            self.cnn = mysql.connector.connect(
-                host="localhost", 
-                user="root", 
-                passwd="mininaluz19", 
-                database="TattooWorld"
-            )
-            if self.cnn.is_connected():
-                print("Conexión exitosa")
-        except Error as e:
-            print(f"Error al conectar a la base de datos: {e}")
-    
-    def __str__(self):
-        datos = self.consulta_datos()        
-        aux = ""
-        for row in datos:
-            aux += str(row) + "\n"
-        return aux
-        
-    def consulta_datos(self):
-        try:
-            cur = self.cnn.cursor()
-            cur.execute("SELECT * FROM Tatuadores")
-            datos = cur.fetchall()
-            cur.close()
-            return datos
-        except Error as e:
-            print(f"Error al realizar consulta: {e}")
-    
-    def buscar_tatuador(self, Id):
-        try:
-            cur = self.cnn.cursor()
-            sql = "SELECT * FROM Tatuadores WHERE idTatuadores = {}".format(Id)
-            cur.execute(sql)
-            datos = cur.fetchone()
-            cur.close()
-            return datos
-        except Error as e:
-            print(f"Error al buscar tatuador: {e}")
+# Función para crear la tabla si no existe
+def create_table():
+    conexion = connect_db()
+    if conexion:
+        cursor = conexion.cursor()
+        cursor.execute('''CREATE TABLE IF NOT EXISTS estilos (
+                            idStyle INTEGER PRIMARY KEY AUTOINCREMENT,
+                            nombre TEXT NOT NULL,
+                            descripcion TEXT NOT NULL
+                        )''')
+        conexion.commit()
+        conexion.close()
 
-    def inserta_tatuador(self, Nombre, apellidoM, apellidoP, idEstilo, idArea):
-        try:
-            cur = self.cnn.cursor()
-            sql = '''INSERT INTO Tatuadores (Nombre, Apellido_M, Apellido_P, idStyle, idArea) 
-                    VALUES('{}', '{}', '{}', '{}', '{}')'''.format(Nombre, apellidoM, apellidoP, idEstilo, idArea)
-            cur.execute(sql)
-            n = cur.rowcount
-            self.cnn.commit()
-            cur.close()
-            return n
-        except Error as e:
-            print(f"Error al insertar tatuador: {e}")
+# Función para insertar un nuevo estilo
+def insert_styles(nombre, descripcion):
+    conexion = connect_db()
+    if conexion:
+        cursor = conexion.cursor()
+        cursor.execute("INSERT INTO estilos (nombre, descripcion) VALUES (?, ?)", (nombre, descripcion))
+        conexion.commit()
+        conexion.close()
+        print("Estilo insertado correctamente.")
 
-    def elimina_tatuador(self, Id):
-        try:
-            cur = self.cnn.cursor()
-            sql = "DELETE FROM Tatuadores WHERE idTatuadores = {}".format(Id)
-            cur.execute(sql)
-            n = cur.rowcount
-            self.cnn.commit()
-            cur.close()
-            return n
-        except Error as e:
-            print(f"Error al eliminar tatuador: {e}")
+# Función para eliminar un estilo por su ID
+def delete_styles(id_style):
+    conexion = connect_db()
+    if conexion:
+        cursor = conexion.cursor()
+        cursor.execute("DELETE FROM estilos WHERE idStyle = ?", (id_style,))
+        conexion.commit()
+        conexion.close()
+        print(f"Estilo con ID {id_style} eliminado correctamente.")
 
-    def modifica_tatuador(self, idTatuador, Nombre, apellidoM, apellidoP, idEstilo, idArea):
-        try:
-            cur = self.cnn.cursor()
-            sql = '''UPDATE Tatuadores SET Nombre='{}', Apellido_M='{}', Apellido_P='{}', 
-                     idStyle='{}', idArea='{}' WHERE idTatuadores={}'''.format(Nombre, apellidoM, apellidoP, idEstilo, idArea, idTatuador)
-            cur.execute(sql)
-            n = cur.rowcount
-            self.cnn.commit()
-            cur.close()
-            return n
-        except Error as e:
-            print(f"Error al modificar tatuador: {e}")
+# Función para obtener todos los estilos
+def show_styles():
+    conexion = connect_db()
+    if conexion:
+        cursor = conexion.cursor()
+        cursor.execute("SELECT * FROM estilos")
+        estilos = cursor.fetchall()
+        conexion.close()
+        return estilos
+    return []
+
+# Función para actualizar un estilo
+def update_styles(id_style, nombre, descripcion):
+    conexion = connect_db()
+    if conexion:
+        cursor = conexion.cursor()
+        cursor.execute("UPDATE estilos SET nombre = ?, descripcion = ? WHERE idStyle = ?", (nombre, descripcion, id_style))
+        conexion.commit()
+        conexion.close()
+        print(f"Estilo con ID {id_style} actualizado correctamente.")
 
