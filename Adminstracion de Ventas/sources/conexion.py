@@ -11,7 +11,7 @@ import sqlite3
 
 def connect_db():
     try:
-        conexion = sqlite3.connect('DB/tattoo_world.sqlite')  
+        conexion = sqlite3.connect('DB/tattoo_world.db')  
         return conexion
     except sqlite3.Error as e:
         print(f"Error al conectar a la base de datos: {e}")

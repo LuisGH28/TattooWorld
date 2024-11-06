@@ -1,200 +1,135 @@
-"""" 
-__author__ = "Luis Gonzalez, Sandra Fragoso"
-__version__ = "0.1"
-__maintainer__ = "Luis Gonzalez"
-__email__ = "luisgnzhdz@gmail.com"
-__status__ = "Production"
+"""
+    __author__ = "Luis Gonzalez"
+    __version__ = "1.0.1"
+    __maintainer__ = "Luis Gonzalez"
+    __email__ = "luisgnzhdz@gmail.com"
+    __status__ = "Production"
 """
 
-from tkinter import *
-from tkinter import ttk
-from conexion import *
+
+import tkinter as tk
 from tkinter import messagebox
+from conexion import connect_db
 
-class Ventana(Frame):
+def insert_tatuador(nombre, apellido_p, apellido_m, estilo, area):
+    conexion = connect_db()
+    if conexion:
+        cursor = conexion.cursor()
+        cursor.execute("INSERT INTO Tatuadores (Nombre, Apellido_P, Apellido_M, Estilo, Area) VALUES (?, ?, ?, ?, ?)",
+                       (nombre, apellido_p, apellido_m, estilo, area))
+        conexion.commit()
+        conexion.close()
+        print("Tatuador insertado correctamente.")
 
-    tatuador = Conecction()
+def delete_tatuador(id_tatuador):
+    conexion = connect_db()
+    if conexion:
+        cursor = conexion.cursor()
+        cursor.execute("DELETE FROM Tatuadores WHERE idTatuador = ?", (id_tatuador,))
+        conexion.commit()
+        conexion.close()
+        print(f"Tatuador con ID {id_tatuador} eliminado correctamente.")
 
-    def __init__(self, master=None):
-        super().__init__(master, width=680, height=360)
-        self.master = master
-        self.pack()
-        self.create_widgets()
-        self.llenaDatos()
-        self.habilitarCajas("disabled")  
-        self.habilitarBtnOper("normal")
-        self.habilitarBtnGuardar("disabled")
-        self.id=-1      
-            
-    def habilitarCajas(self,estado):
-        self.txtNombre.configure(state=estado)
-        self.txtAM.configure(state=estado)
-        self.txtAP.configure(state=estado)
-        self.txtEstilo.configure(state=estado)
-        self.txtArea.configure(state=estado)
+def update_tatuador(id_tatuador, nombre, apellido_p, apellido_m, estilo, area):
+    conexion = connect_db()
+    if conexion:
+        cursor = conexion.cursor()
+        cursor.execute("UPDATE Tatuadores SET Nombre = ?, Apellido_P = ?, Apellido_M = ?, Estilo = ?, Area = ? WHERE idTatuador = ?",
+                       (nombre, apellido_p, apellido_m, estilo, area, id_tatuador))
+        conexion.commit()
+        conexion.close()
+        print(f"Tatuador con ID {id_tatuador} actualizado correctamente.")
 
-        
-    def habilitarBtnOper(self,estado):
-        self.btnNuevo.configure(state=estado)                
-        self.btnModificar.configure(state=estado)
-        self.btnEliminar.configure(state=estado)
-        
-    def habilitarBtnGuardar(self,estado):
-        self.btnGuardar.configure(state=estado)                
-        self.btnCancelar.configure(state=estado)                
-        
-    def limpiarCajas(self):
-        self.txtNombre.delete(0,END)
-        self.txtAM.delete(0,END)
-        self.txtAP.delete(0,END)
-        self.txtEstilo.delete(0,END)
-        self.txtArea.delete(0,END)
-        
-    def limpiaGrid(self):
-        for item in self.grid.get_children():
-            self.grid.delete(item)
+def show_tatuadores():
+    conexion = connect_db()
+    if conexion:
+        cursor = conexion.cursor()
+        cursor.execute("SELECT * FROM Tatuadores")
+        tatuadores = cursor.fetchall()
+        conexion.close()
+        return tatuadores
+    return []
 
-    def llenaDatos(self):
-        datos= self.tatuador.consulta_datos()
+def show_tattooists_interface(parent_frame):
+    def refresh_tatuadores_list():
+        for widget in tatuadores_list_frame.winfo_children():
+            widget.destroy()
+        tatuadores = show_tatuadores()
+        for tatuador in tatuadores:
+            tk.Label(tatuadores_list_frame, text=f"{tatuador[0]} - {tatuador[1]} {tatuador[2]} {tatuador[3]}, Estilo ID: {tatuador[4]}, Área ID: {tatuador[5]}").pack(anchor="w")
 
-        for row in datos:
-            self.grid.insert("",END,text=row[0], values=(row[1],row[2], row[3],row[4], row[5]))
-                    
-        if len(self.grid.get_children()) > 0:
-            self.grid.selection_set( self.grid.get_children()[0] )
-
-    def fNuevo(self):
-        self.habilitarCajas("normal")  
-        self.habilitarBtnOper("disabled")
-        self.habilitarBtnGuardar("normal")
-        self.limpiarCajas()        
-        self.txtNombre.focus()
-
-    def fModificar(self):
-        selected = self.grid.focus()                               
-        clave = self.grid.item(selected,'text')        
-        if clave == '':
-            messagebox.showwarning("Modificar", 'Debes seleccionar un elemento.')            
-        else:            
-            self.id= clave  
-            self.habilitarCajas("normal")                         
-            valores = self.grid.item(selected,'values')
-            self.limpiarCajas()            
-            self.txtNombre.insert(0,valores[0])
-            self.txtAM.insert(0,valores[1])
-            self.txtAP.insert(0,valores[2])
-            self.txtEstilo.insert(0,valores[3])
-            self.txtArea.insert(0,valores[4])
-            self.habilitarBtnOper("disabled")
-            self.habilitarBtnGuardar("normal")
-            self.txtNombre.focus()
-
-    def fEliminar(self):
-        selected = self.grid.focus()                               
-        clave = self.grid.item(selected,'text')        
-        if clave == '':
-            messagebox.showwarning("Eliminar", 'Debes seleccionar un elemento.')            
-        else:                           
-            valores = self.grid.item(selected,'values')
-            data = str(clave) + ", " + valores[0] + ", " + valores[1]
-            r = messagebox.askquestion("Eliminar", "Deseas eliminar el registro seleccionado?\n" + data)            
-            if r == messagebox.YES:
-                n = self.tatuador.elimina_tatuador(clave)
-                if n == 1:
-                    messagebox.showinfo("Eliminar", 'Elemento eliminado correctamente.')
-                    self.limpiaGrid()
-                    self.llenaDatos()
-                else:
-                    messagebox.showwarning("Eliminar", 'No fue posible eliminar el elemento.')
-
-    def fGuardar(self):
-        if self.id ==-1:       
-            self.tatuador.inserta_tatuador(self.txtNombre.get(),self.txtAM.get(),self.txtAP.get(),self.txtEstilo.get(),self.txtArea.get())           
-            messagebox.showinfo("Insertar", 'Elemento insertado correctamente.')
+    def add_tatuador():
+        nombre = nombre_entry.get()
+        apellido_p = apellido_p_entry.get()
+        apellido_m = apellido_m_entry.get()
+        estilo = estilo_entry.get()
+        area = area_entry.get()
+        if nombre and apellido_p and estilo and area:
+            insert_tatuador(nombre, apellido_p, apellido_m, estilo, area)
+            refresh_tatuadores_list()
+            clear_entries()
         else:
-            self.tatuador.modifica_tatuador(self.id,self.txtNombre.get(),self.txtAM.get(),self.txtAP.get(),self.txtEstilo.get(),self.txtArea.get())
-            messagebox.showinfo("Modificar", 'Elemento modificado correctamente.')
-            self.id = -1
-        self.limpiaGrid()
-        self.llenaDatos()  
-        self.habilitarBtnGuardar("disabled")      
-        self.habilitarBtnOper("normal")
-        self.habilitarCajas("disabled")
+            messagebox.showerror("Error", "Todos los campos son obligatorios")
 
-    def fCancelar(self):
-        r = messagebox.askquestion("Calcelar", "Esta seguro que desea cancelar la operación actual")
-        if r == messagebox.YES:
-            self.limpiarCajas() 
-            self.habilitarBtnGuardar("disabled")      
-            self.habilitarBtnOper("normal")
-            self.habilitarCajas("disabled")
+    def delete_selected_tatuador():
+        selected_id = id_entry.get()
+        if selected_id:
+            delete_tatuador(int(selected_id))
+            refresh_tatuadores_list()
+            clear_entries()
+        else:
+            messagebox.showerror("Error", "Por favor, ingresa el ID del tatuador a eliminar")
 
-    def create_widgets(self):
-        frame1 = Frame(self, bg="#bfdaff")
-        frame1.place(x=0, y=0, width=193, height=359)
+    def update_selected_tatuador():
+        selected_id = id_entry.get()
+        nombre = nombre_entry.get()
+        apellido_p = apellido_p_entry.get()
+        apellido_m = apellido_m_entry.get()
+        estilo = estilo_entry.get()
+        area = area_entry.get()
+        if selected_id and nombre and apellido_p and estilo and area:
+            update_tatuador(int(selected_id), nombre, apellido_p, apellido_m, estilo, area)
+            refresh_tatuadores_list()
+            clear_entries()
+        else:
+            messagebox.showerror("Error", "Todos los campos son obligatorios para actualizar")
 
-        self.btnNuevo=Button(frame1, text="Nuevo", command=self.fNuevo, bg="blue", fg="White")
-        self.btnNuevo.place(x=5, y=50, width=80, height=30)
+    tk.Label(parent_frame, text="ID").pack()
+    id_entry = tk.Entry(parent_frame)
+    id_entry.pack()
 
-        self.btnModificar=Button(frame1, text="Modificr", command=self.fModificar, bg="blue", fg="White")
-        self.btnModificar.place(x=5, y=90, width=80, height=30)
+    tk.Label(parent_frame, text="Nombre").pack()
+    nombre_entry = tk.Entry(parent_frame)
+    nombre_entry.pack()
 
-        self.btnEliminar=Button(frame1, text="Eliminar", command=self.fEliminar, bg="blue", fg="White")
-        self.btnEliminar.place(x=5, y=130, width=80, height=30)
+    tk.Label(parent_frame, text="Apellido Paterno").pack()
+    apellido_p_entry = tk.Entry(parent_frame)
+    apellido_p_entry.pack()
 
-        frame2 = Frame(self,bg="#d3dde3")
-        frame2.place(x=95,y=0,width=150,height=359)
+    tk.Label(parent_frame, text="Apellido Materno").pack()
+    apellido_m_entry = tk.Entry(parent_frame)
+    apellido_m_entry.pack()
 
-        lbl1 = Label(frame2, text="Nombre: ")
-        lbl1.place(x=3,y=5)
-        self.txtNombre=Entry(frame2)
-        self.txtNombre.place(x=3,y=25,width=50,height=20)
+    tk.Label(parent_frame, text="Estilo ID").pack()
+    estilo_entry = tk.Entry(parent_frame)
+    estilo_entry.pack()
 
-        lbl2 = Label(frame2, text="Apellido M: ")
-        lbl2.place(x=3,y=55)
-        self.txtAM=Entry(frame2)
-        self.txtAM.place(x=3,y=75,width=100,height=20)
+    tk.Label(parent_frame, text="Área ID").pack()
+    area_entry = tk.Entry(parent_frame)
+    area_entry.pack()
 
-        lbl3 = Label(frame2, text="Apellido P: ")
-        lbl3.place(x=3,y=105)
-        self.txtAP=Entry(frame2)
-        self.txtAP.place(x=3,y=125,width=150,height=20)
+    tk.Button(parent_frame, text="Agregar Tatuador", command=add_tatuador).pack(fill="x", pady=5)
+    tk.Button(parent_frame, text="Actualizar Tatuador", command=update_selected_tatuador).pack(fill="x", pady=5)
+    tk.Button(parent_frame, text="Eliminar Tatuador", command=delete_selected_tatuador).pack(fill="x", pady=5)
 
-        lbl4 = Label(frame2, text="Estilo: ")
-        lbl4.place(x=3,y=155)
-        self.txtEstilo=Entry(frame2)
-        self.txtEstilo.place(x=3,y=175,width=200,height=20)
+    tatuadores_list_frame = tk.Frame(parent_frame)
+    tatuadores_list_frame.pack(fill="both", expand=True)
+    refresh_tatuadores_list()
 
-        lbl5 = Label(frame2, text="Area: ")
-        lbl5.place(x=3,y=205)
-        self.txtArea=Entry(frame2)
-        self.txtArea.place(x=3,y=225,width=250,height=20)
-
-        self.btnGuardar=Button(frame2,text="Guardar", command=self.fGuardar, bg="green", fg="white")
-        self.btnGuardar.place(x=10, y=260, width=60, height=30)
-        self.btnCancelar=Button(frame2,text="Cancelar", command=self.fCancelar, bg="green", fg="white")
-        self.btnCancelar.place(x=80, y=260, width=60, height=30)
-
-        frame3 = Frame(self,bg="yellow" )
-        frame3.place(x=247,y=0,width=420, height=259) 
-        
-        self.grid = ttk.Treeview(self, columns=("col1", "col2", "col3", "col4", "col5"))
-
-        self.grid.column("#0", width=50)
-        self.grid.column("col1", width=60, anchor=CENTER)
-        self.grid.column("col2", width=90, anchor=CENTER)
-        self.grid.column("col3", width=90, anchor=CENTER)
-        self.grid.column("col4", width=70, anchor=CENTER)
-        self.grid.column("col5", width=70, anchor=CENTER)
-
-        self.grid.heading("#0", text="id", anchor=CENTER)
-        self.grid.heading("col1", text="Nombre", anchor=CENTER)
-        self.grid.heading("col2", text="Apellido M", anchor=CENTER)
-        self.grid.heading("col3", text="Apellido P", anchor=CENTER)
-        self.grid.heading("col5", text="Area", anchor=CENTER)
-
-        self.grid.place(x=247, y=0, width=420, height=340)
-        self.grid.heading("col4", text="Estilo", anchor=CENTER)
-   
-       
-        self.grid['selectmode']='browse' 
+    def clear_entries():
+        id_entry.delete(0, tk.END)
+        nombre_entry.delete(0, tk.END)
+        apellido_p_entry.delete(0, tk.END)
+        apellido_m_entry.delete(0, tk.END)
+        estilo_entry.delete(0, tk.END)
+        area_entry.delete(0, tk.END)

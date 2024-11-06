@@ -1,161 +1,105 @@
-"""" 
-__author__ = "Luis Gonzalez, Sandra Fragoso"
-__version__ = "0.1"
-__maintainer__ = "Luis Gonzalez"
-__email__ = "luisgnzhdz@gmail.com"
-__status__ = "Production"
+"""
+    __author__ = "Luis Gonzalez"
+    __version__ = "1.0.1"
+    __maintainer__ = "Luis Gonzalez"
+    __email__ = "luisgnzhdz@gmail.com"
+    __status__ = "Production"
 """
 
-from tkinter import *
-from tkinter import ttk
-from conecctionArea import *
+
+import tkinter as tk
 from tkinter import messagebox
+from conexion import connect_db
 
+def insert_area(nombre):
+    conexion = connect_db()
+    if conexion:
+        cursor = conexion.cursor()
+        cursor.execute("INSERT INTO Area (Nombre_Area) VALUES (?)", (nombre,))
+        conexion.commit()
+        conexion.close()
+        print("Área insertada correctamente.")
 
-class Area(Frame):
-    
-    area = Areaconeection()
-        
-    def __init__(self, master=None):
-        super().__init__(master,width=680, height=260)
-        self.master = master
-        self.pack()
-        self.create_widgets()
-        self.llenaDatos()
-        self.habilitarCajas("disabled")  
-        self.habilitarBtnOper("normal")
-        self.habilitarBtnGuardar("disabled")  
-        self.id=-1      
-                   
-    def habilitarCajas(self,estado):
-        self.txtNombre.configure(state=estado)
-        
-    def habilitarBtnOper(self,estado):
-        self.btnNuevo.configure(state=estado)                
-        self.btnModificar.configure(state=estado)
-        self.btnEliminar.configure(state=estado)
-        
-    def habilitarBtnGuardar(self,estado):
-        self.btnGuardar.configure(state=estado)                
-        self.btnCancelar.configure(state=estado)                
-        
-    def limpiarCajas(self):
-        self.txtCapital.delete(0,END)
-        self.txtCurrency.delete(0,END)
-        self.txtNombre.delete(0,END)
-        
-    def limpiaGrid(self):
-        for item in self.grid.get_children():
-            self.grid.delete(item)
-                
-    def llenaDatos(self):
-        datos = self.area.consulta_area()        
-        for row in datos:            
-            self.grid.insert("",END,text=row[0], values=(row[1]))
-        
-        if len(self.grid.get_children()) > 0:
-            self.grid.selection_set( self.grid.get_children()[0] )
-            
-    def fNuevo(self):         
-        self.habilitarCajas("normal")  
-        self.habilitarBtnOper("disabled")
-        self.habilitarBtnGuardar("normal")
-        self.limpiarCajas()        
-        self.txtNombre.focus()
-    
-    def fGuardar(self): 
-        if self.id ==-1:       
-            self.area.inserta_area(self.txtNombre.get())            
-            messagebox.showinfo("Insertar", 'Elemento insertado correctamente.')
+def delete_area(id_area):
+    conexion = connect_db()
+    if conexion:
+        cursor = conexion.cursor()
+        cursor.execute("DELETE FROM Area WHERE idArea = ?", (id_area,))
+        conexion.commit()
+        conexion.close()
+        print(f"Área con ID {id_area} eliminada correctamente.")
+
+def update_area(id_area, nombre):
+    conexion = connect_db()
+    if conexion:
+        cursor = conexion.cursor()
+        cursor.execute("UPDATE Area SET Nombre_Area = ? WHERE idArea = ?", (nombre, id_area))
+        conexion.commit()
+        conexion.close()
+        print(f"Área con ID {id_area} actualizada correctamente.")
+
+def show_areas():
+    conexion = connect_db()
+    if conexion:
+        cursor = conexion.cursor()
+        cursor.execute("SELECT * FROM Area")
+        areas = cursor.fetchall()
+        conexion.close()
+        return areas
+    return []
+
+def show_areas_interface(parent_frame):
+    def refresh_areas_list():
+        for widget in areas_list_frame.winfo_children():
+            widget.destroy()
+        areas = show_areas()
+        for area in areas:
+            tk.Label(areas_list_frame, text=f"{area[0]} - {area[1]}").pack(anchor="w")
+
+    def add_area():
+        nombre = nombre_entry.get()
+        if nombre:
+            insert_area(nombre)
+            refresh_areas_list()
+            clear_entries()
         else:
-            self.area.modifica_area(self.txtNombre.get())
-            messagebox.showinfo("Modificar", 'Elemento modificado correctamente.')
-            self.id = -1            
-        self.limpiaGrid()
-        self.llenaDatos() 
-        self.limpiarCajas() 
-        self.habilitarBtnGuardar("disabled")      
-        self.habilitarBtnOper("normal")
-        self.habilitarCajas("disabled")
-                    
-    def fModificar(self):        
-        selected = self.grid.focus()                               
-        clave = self.grid.item(selected,'text')        
-        if clave == '':
-            messagebox.showwarning("Modificar", 'Debes seleccionar un elemento.')            
-        else:            
-            self.id= clave  
-            self.habilitarCajas("normal")                         
-            valores = self.grid.item(selected,'values')
-            self.limpiarCajas()            
-            self.txtNombre.insert(0,valores[0])           
-            self.habilitarBtnOper("disabled")
-            self.habilitarBtnGuardar("normal")
-            self.txtNombre.focus()
-                                        
-    def fEliminar(self):
-        selected = self.grid.focus()                               
-        clave = self.grid.item(selected,'text')        
-        if clave == '':
-            messagebox.showwarning("Eliminar", 'Debes seleccionar un elemento.')            
-        else:                           
-            valores = self.grid.item(selected,'values')
-            data = str(clave) + ", " + valores[0] + ", " + valores[1]
-            r = messagebox.askquestion("Eliminar", "Deseas eliminar el registro seleccionado?\n" + data)            
-            if r == messagebox.YES:
-                n = self.area.elimina_area(clave)
-                if n == 1:
-                    messagebox.showinfo("Eliminar", 'Elemento eliminado correctamente.')
-                    self.limpiaGrid()
-                    self.llenaDatos()
-                else:
-                    messagebox.showwarning("Eliminar", 'No fue posible eliminar el elemento.')
-                            
-    def fCancelar(self):
-        r = messagebox.askquestion("Calcelar", "Esta seguro que desea cancelar la operación actual")
-        if r == messagebox.YES:
-            self.limpiarCajas() 
-            self.habilitarBtnGuardar("disabled")      
-            self.habilitarBtnOper("normal")
-            self.habilitarCajas("disabled")
+            messagebox.showerror("Error", "El campo de nombre es obligatorio")
 
-    def create_widgets(self):
+    def delete_selected_area():
+        selected_id = id_entry.get()
+        if selected_id:
+            delete_area(int(selected_id))
+            refresh_areas_list()
+            clear_entries()
+        else:
+            messagebox.showerror("Error", "Por favor, ingresa el ID del área a eliminar")
 
-        frame1 = Frame(self, bg="#bfdaff")
-        frame1.place(x=0,y=0,width=93, height=259)        
-        self.btnNuevo=Button(frame1,text="Nuevo", command=self.fNuevo, bg="blue", fg="white")
-        self.btnNuevo.place(x=5,y=50,width=80, height=30 )        
-        self.btnModificar=Button(frame1,text="Modificar", command=self.fModificar, bg="blue", fg="white")
-        self.btnModificar.place(x=5,y=90,width=80, height=30)                
-        self.btnEliminar=Button(frame1,text="Eliminar", command=self.fEliminar, bg="blue", fg="white")
-        self.btnEliminar.place(x=5,y=130,width=80, height=30)       
+    def update_selected_area():
+        selected_id = id_entry.get()
+        nombre = nombre_entry.get()
+        if selected_id and nombre:
+            update_area(int(selected_id), nombre)
+            refresh_areas_list()
+            clear_entries()
+        else:
+            messagebox.showerror("Error", "Todos los campos son obligatorios para actualizar")
 
-        frame2 = Frame(self,bg="#d3dde3" )
-        frame2.place(x=95,y=0,width=350, height=359)                        
-        lbl1 = Label(frame2,text="Nombre: ")
-        lbl1.place(x=3,y=5)        
-        
-        self.txtNombre=Entry(frame2)
-        self.txtNombre.place(x=3,y=25,width=100, height=20)                
-              
-        self.btnGuardar=Button(frame2,text="Guardar", command=self.fGuardar, bg="green", fg="white")
-        self.btnGuardar.place(x=10,y=210,width=60, height=30)
-        self.btnCancelar=Button(frame2,text="Cancelar", command=self.fCancelar, bg="red", fg="white")
-        self.btnCancelar.place(x=80,y=210,width=60, height=30)   
+    tk.Label(parent_frame, text="ID").pack()
+    id_entry = tk.Entry(parent_frame)
+    id_entry.pack()
 
+    tk.Label(parent_frame, text="Nombre").pack()
+    nombre_entry = tk.Entry(parent_frame)
+    nombre_entry.pack()
 
-        frame3 = Frame(self )
-        frame3.place(x=247,y=0,width=420, height=259)                      
-        self.grid = ttk.Treeview(frame3, columns=("col1"))        
-        self.grid.column("#0",width=60)
-        self.grid.column("col1",width=340, anchor=CENTER)
-              
-        self.grid.heading("#0", text="Id", anchor=CENTER)
-        self.grid.heading("col1", text="Area", anchor=CENTER)
-                 
-        self.grid.pack(side=LEFT,fill = Y)        
-        sb = Scrollbar(frame3, orient=VERTICAL)
-        sb.pack(side=RIGHT, fill = Y)
-        self.grid.config(yscrollcommand=sb.set)
-        sb.config(command=self.grid.yview)
-        self.grid['selectmode']='browse'     
+    tk.Button(parent_frame, text="Agregar Área", command=add_area).pack(fill="x", pady=5)
+    tk.Button(parent_frame, text="Actualizar Área", command=update_selected_area).pack(fill="x", pady=5)
+    tk.Button(parent_frame, text="Eliminar Área", command=delete_selected_area).pack(fill="x", pady=5)
+
+    areas_list_frame = tk.Frame(parent_frame)
+    areas_list_frame.pack(fill="both", expand=True)
+    refresh_areas_list()
+
+    def clear_entries():
+        id_entry.delete(0, tk.END)
+        nombre_entry.delete(0, tk.END)
