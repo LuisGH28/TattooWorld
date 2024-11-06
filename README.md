@@ -4,7 +4,7 @@ It's a CRUD with sqlite and tkinter about a Tattoo shop
 
 ## Screenshots 
 
-![App Screenshot]{images/tattooWorlds.png}
+![App Screenshot]{Administracion\ de\ Ventas/sources/images/tattooWorlds.png}
 
 ## Authors
 
