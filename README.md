@@ -1,6 +1,6 @@
 # TattooWorld
 
-It's a CRUD with sqlite and tkinter about a Tattoo shop 
+This Python application, utilizing Tkinter for the GUI and SQLite as the database, serves as a comprehensive management tool for tattoo parlors. It allows for the creation, reading, updating, and deletion (CRUD) of customer , appointment schedules, and other relevant data.
 
 ## Screenshots 
 ![App Screenshot](tattooWorlds.png)
