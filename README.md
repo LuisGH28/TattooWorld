@@ -13,3 +13,9 @@ This Python application, utilizing Tkinter for the GUI and SQLite as the databas
 ## Feedback
 
 If you have any feedback, please reach out to us at luisgnzhdz@gmail.com
+
+## Licence 
+
+MIT 
+
+** Free Software **
