@@ -3,7 +3,7 @@
 It's a CRUD with sqlite and tkinter about a Tattoo shop 
 
 ## Screenshots 
-![App Screenshot](Administracion de Ventas/sources/images/tattooWorlds.png)
+![App Screenshot](tattooWorlds.png)
 
 ## Authors
 
